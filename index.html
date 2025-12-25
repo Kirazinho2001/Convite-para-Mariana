@@ -25,21 +25,7 @@
             color: white;
         }
 
-        /* --- Fundo com Corações --- */
-        .background-hearts {
-            position: absolute;
-            inset: 0;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .floating-heart {
-            position: absolute;
-            color: rgba(255, 122, 122, 0.4);
-            animation: floatUp linear infinite;
-        }
-
-        /* --- Coração Central GIGANTE --- */
+        /* Coração Central - ESCALA MÁXIMA */
         .main-heart-container {
             position: absolute;
             inset: 0;
@@ -50,14 +36,14 @@
         .love-word {
             position: absolute;
             color: var(--neon-pink);
-            font-size: 1.2rem; /* Fonte maior para o coração gigante */
+            font-size: 1.2rem;
             text-shadow: 0 0 10px #fff;
             white-space: nowrap;
             font-weight: bold;
             animation: pulse 3s infinite ease-in-out alternate;
         }
 
-        /* --- Interface --- */
+        /* Interface Principal */
         .card {
             position: relative;
             z-index: 10;
@@ -72,14 +58,6 @@
             backdrop-filter: blur(10px);
         }
 
-        h2 { 
-            margin-bottom: 2rem; 
-            font-size: 1.6rem; 
-            text-shadow: 0 0 10px var(--primary-pink); 
-        }
-
-        .btn-group { display: flex; justify-content: center; gap: 1.5rem; min-height: 50px; }
-
         .btn {
             background: var(--primary-pink);
             color: white;
@@ -88,10 +66,7 @@
             border-radius: 10px;
             cursor: pointer;
             font-weight: 800;
-            transition: all 0.3s ease;
         }
-
-        .btn:hover { transform: scale(1.05); background: #ff4f4f; }
 
         #screen-success {
             display: none;
@@ -109,23 +84,19 @@
             from { opacity: 0.5; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1.05); }
         }
-
-        @keyframes floatUp {
-            0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
-            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
-        }
     </style>
 </head>
-<body onclick="playMusic()"> <audio id="meuAudio" loop>
+<body>
+
+    <audio id="meuAudio" loop preload="auto">
         <source src="musica.mp3" type="audio/mpeg">
     </audio>
 
-    <div class="background-hearts" id="bg-hearts"></div>
     <div class="main-heart-container" id="heart-wrapper"></div>
 
     <main class="card">
         <h2>Vamos sair segunda minha morena paçoca?</h2>
-        <div class="btn-group">
+        <div style="display: flex; justify-content: center; gap: 1.5rem; margin-top: 2rem;">
             <button class="btn" onclick="handleYes()">SIM</button>
             <button class="btn" id="btn-no" onmouseover="dodgeButton()" onclick="dodgeButton()">NÃO</button>
         </div>
@@ -137,56 +108,35 @@
     </section>
 
     <script>
-        const CONFIG = {
-            totalHeartWords: 160, 
-            heartText: "i like you"
-        };
+        const audio = document.getElementById('meuAudio');
 
-        // Iniciar música na primeira interação
-        function playMusic() {
-            const audio = document.getElementById('meuAudio');
-            audio.play().catch(e => console.log("Aguardando interação..."));
+        // Função para garantir que a música toque após interação
+        function tocarMusica() {
+            audio.play().catch(e => console.log("O navegador bloqueou o áudio inicial."));
         }
 
         function renderMainHeart() {
             const wrapper = document.getElementById('heart-wrapper');
             const isMobile = window.innerWidth < 600;
-            
-            // ESCALA GIGANTE
-            const scale = isMobile ? 20 : 35; 
+            const scale = isMobile ? 22 : 40; // Coração ainda maior
 
-            for (let i = 0; i < CONFIG.totalHeartWords; i++) {
-                const angle = (i / CONFIG.totalHeartWords) * Math.PI * 2;
+            for (let i = 0; i < 180; i++) {
+                const angle = (i / 180) * Math.PI * 2;
                 const x = 16 * Math.pow(Math.sin(angle), 3);
                 const y = -(13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle));
 
                 const span = document.createElement('span');
                 span.className = 'love-word';
-                span.innerText = CONFIG.heartText;
-                
+                span.innerText = "i like you";
                 span.style.left = `calc(50% + ${x * scale}px)`;
                 span.style.top = `calc(50% + ${y * scale}px)`;
                 span.style.transform = `translate(-50%, -50%) rotate(${angle}rad)`;
-                
                 wrapper.appendChild(span);
             }
         }
 
-        function startFloatingHearts() {
-            const container = document.getElementById('bg-hearts');
-            setInterval(() => {
-                const heart = document.createElement('div');
-                heart.className = 'floating-heart';
-                heart.innerHTML = '❤️';
-                heart.style.left = Math.random() * 100 + 'vw';
-                heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
-                heart.style.animationDuration = (Math.random() * 5 + 5) + 's';
-                container.appendChild(heart);
-                setTimeout(() => heart.remove(), 8000);
-            }, 400);
-        }
-
         function dodgeButton() {
+            tocarMusica(); // Tenta tocar quando ela tentar clicar no NÃO
             const btn = document.getElementById('btn-no');
             btn.style.position = 'fixed';
             btn.style.left = Math.random() * 80 + 10 + '%';
@@ -194,13 +144,11 @@
         }
 
         function handleYes() {
+            tocarMusica(); // Garante que toque ao aceitar
             document.getElementById('screen-success').style.display = 'flex';
         }
 
-        window.onload = () => {
-            renderMainHeart();
-            startFloatingHearts();
-        };
+        window.onload = renderMainHeart;
     </script>
 </body>
 </html>
