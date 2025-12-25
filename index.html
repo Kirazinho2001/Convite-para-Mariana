@@ -26,6 +26,14 @@
             color: white;
         }
 
+        /* --- Player do YouTube (Invisível) --- */
+        #youtube-player-container {
+            position: absolute;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+        }
+
         /* --- Player de Música Estilo Spotify --- */
         .music-player-container {
             position: fixed;
@@ -58,7 +66,7 @@
         #spotify-btn svg { width: 25px; fill: var(--spotify-green); }
         .playing { animation: rotate 4s linear infinite; }
 
-        /* Controle de Volume Oculto */
+        /* Controle de Volume */
         .volume-group {
             display: flex;
             align-items: center;
@@ -73,7 +81,7 @@
         .volume-slider { width: 80px; cursor: pointer; accent-color: var(--spotify-green); }
         #volume-icon-btn { background: none; border: none; font-size: 20px; cursor: pointer; }
 
-        /* --- Chuva de Corações --- */
+        /* --- Coração e Chuva de Partículas --- */
         .heart-particle {
             position: absolute;
             color: var(--primary-pink);
@@ -84,12 +92,11 @@
         }
 
         @keyframes moveHeart {
-            0% { transform: translate(0, 0) scale(0) rotate(0deg); opacity: 0; }
+            0% { transform: translate(0, 0) scale(0); opacity: 0; }
             10% { opacity: 0.8; transform: scale(1); }
-            100% { transform: translate(var(--tx), var(--ty)) scale(0.5) rotate(360deg); opacity: 0; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0.5); opacity: 0; }
         }
 
-        /* --- Interface --- */
         .card {
             position: relative;
             z-index: 10;
@@ -136,19 +143,19 @@
 </head>
 <body>
 
+    <div id="youtube-player-container">
+        <div id="player"></div>
+    </div>
+
     <div class="music-player-container">
         <button id="volume-icon-btn" onclick="toggleVolumeSlider()">🔊</button>
         <div class="volume-group" id="volume-wrapper">
-            <input type="range" class="volume-slider" min="0" max="1" step="0.1" value="0.8" oninput="changeVolume(this.value)">
+            <input type="range" class="volume-slider" min="0" max="100" step="5" value="80" oninput="changeVolume(this.value)">
         </div>
         <div id="spotify-btn" onclick="toggleMusic()">
             <svg viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.49 17.31c-.22.36-.68.47-1.05.25-2.81-1.73-6.35-2.12-10.51-1.17-.41.1-.82-.16-.92-.57-.1-.41.16-.82.57-.92 4.58-1.04 8.52-.6 11.66 1.33.37.23.49.69.25 1.08zm1.48-3.26c-.28.45-.87.59-1.32.32-3.22-1.98-8.12-2.55-11.93-1.39-.51.15-1.04-.15-1.19-.66-.15-.51.15-1.04.66-1.19 4.35-1.32 9.75-.68 13.46 1.59.45.28.6 0.87.32 1.33zm.12-3.41C15.22 8.35 8.8 8.14 5.08 9.27c-.59.18-1.21-.16-1.39-.75s.16-1.21.75-1.39c4.26-1.29 11.36-1.05 15.82 1.6.53.31.71 1 .39 1.53-.31.53-1 .71-1.53.39z"/></svg>
         </div>
     </div>
-
-    <audio id="meuAudio" loop preload="auto">
-        <source src="musica.mp3" type="audio/mpeg">
-    </audio>
 
     <div class="main-heart-container" id="heart-wrapper"></div>
 
@@ -165,23 +172,37 @@
         <p>Vou te encher de beijos quando te encontrar! :)</p>
     </div>
 
+    <script src="https://www.youtube.com/iframe_api"></script>
+
     <script>
-        const audio = document.getElementById('meuAudio');
+        let player;
         const spotifyBtn = document.getElementById('spotify-btn');
         const volumeWrapper = document.getElementById('volume-wrapper');
 
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '0',
+                width: '0',
+                videoId: 'vUI2PT3rKts', // Foi assim - Sotam
+                playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': 'vUI2PT3rKts' }
+            });
+        }
+
         function toggleMusic() {
-            if (audio.paused) {
-                audio.play();
-                spotifyBtn.classList.add('playing');
-            } else {
-                audio.pause();
-                spotifyBtn.classList.remove('playing');
+            if (player && player.getPlayerState) {
+                const state = player.getPlayerState();
+                if (state === YT.PlayerState.PLAYING) {
+                    player.pauseVideo();
+                    spotifyBtn.classList.remove('playing');
+                } else {
+                    player.playVideo();
+                    spotifyBtn.classList.add('playing');
+                }
             }
         }
 
         function toggleVolumeSlider() { volumeWrapper.classList.toggle('active'); }
-        function changeVolume(val) { audio.volume = val; }
+        function changeVolume(val) { if(player) player.setVolume(val); }
 
         function createHeart() {
             const heart = document.createElement('div');
