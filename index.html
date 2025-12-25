@@ -5,34 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vamos sair segunda?</title>
     <style>
-        /* Estilos Gerais */
         body {
             margin: 0;
             padding: 0;
-            background-color: #000; /* Fundo preto para o neon destacar */
+            background: radial-gradient(circle, #220a11 0%, #000000 100%);
             overflow: hidden;
             font-family: 'Arial', sans-serif;
+            height: 100vh;
+            width: 100vw;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
         }
 
         #conteudo {
-            position: absolute;
-            z-index: 10;
+            position: relative;
+            z-index: 100; /* Garante que os botões fiquem na frente */
             text-align: center;
-            background: rgba(255, 122, 122, 0.1);
-            backdrop-filter: blur(5px);
-            padding: 30px;
-            border-radius: 20px;
+            padding: 20px;
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         h2 {
-            margin-bottom: 30px;
-            text-shadow: 0 0 10px #ff7a7a;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px #ff7a7a;
         }
 
         .btn-container {
@@ -48,42 +45,38 @@
             border: none;
             padding: 10px 20px;
             width: 80px;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            transition: 0.3s;
             box-shadow: 0 0 10px rgba(255, 122, 122, 0.5);
         }
 
-        .btn:hover {
-            transform: scale(1.1);
-            background: #ff4f4f;
-        }
-
-        /* Estilos do Coração Animado */
+        /* Estilos do Coração */
         .heart-container {
             position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 100%;
             height: 100%;
-            perspective: 1000px;
+            pointer-events: none; /* Deixa clicar nos botões através das letras */
         }
 
         .love-word {
             position: absolute;
             color: #ea80b0;
-            font-size: 1.2rem;
-            text-shadow: 0 0 10px #fff;
+            font-size: 0.9rem;
+            text-shadow: 0 0 8px #fff;
             white-space: nowrap;
-            user-select: none;
-            /* Animação horizontal */
-            animation: horizontal 10000ms infinite alternate ease-in-out;
+            text-transform: lowercase;
+            opacity: 0.8;
+            animation: pulse 3s infinite ease-in-out alternate;
         }
 
-        @keyframes horizontal {
-            from { transform: translateX(-20px) rotateY(0deg); }
-            to { transform: translateX(20px) rotateY(20deg); }
+        @keyframes pulse {
+            from { opacity: 0.5; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1.1); }
         }
-
     </style>
 </head>
 <body>
@@ -99,51 +92,52 @@
     </div>
 
     <script>
-        // Configuração do Coração
         const heartContainer = document.getElementById('heart');
-        const totalWords = 80; // Quantidade de frases
+        const totalWords = 100; // Mais palavras para o coração ficar cheio
 
-        for (let i = 0; i < totalWords; i++) {
-            const word = document.createElement('div');
-            word.className = 'love-word';
-            word.innerText = 'i like you';
-            
-            // Lógica matemática para posicionar as frases em formato de coração
-            const angle = (i / totalWords) * Math.PI * 2;
-            const x = 16 * Math.pow(Math.sin(angle), 3);
-            const y = -(13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle));
-            
-            // Ajuste de escala e centralização
-            const scale = 15; 
-            const left = 50 + (x * scale);
-            const top = 45 + (y * scale);
+        function createHeart() {
+            for (let i = 0; i < totalWords; i++) {
+                const word = document.createElement('div');
+                word.className = 'love-word';
+                word.innerText = 'i like you';
+                
+                // Ângulo para a fórmula do coração
+                const angle = (i / totalWords) * Math.PI * 2;
+                
+                // Fórmula matemática do formato de coração (Parametric Heart)
+                const x = 16 * Math.pow(Math.sin(angle), 3);
+                const y = -(13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle));
+                
+                // Ajuste de escala para mobile e desktop
+                const responsiveScale = window.innerWidth < 600 ? 10 : 18;
+                
+                const left = (x * responsiveScale);
+                const top = (y * responsiveScale);
 
-            word.style.left = left + '%';
-            word.style.top = top + '%';
-            
-            // Delay da animação baseado na variável --i do CSS que estava na sua imagem
-            word.style.animationDelay = (i * -300) + 'ms';
-            
-            // Rotação leve para seguir o fluxo do desenho
-            word.style.transform = `rotate(${angle}rad)`;
+                // Posiciona a partir do centro
+                word.style.left = `calc(50% + ${left}px)`;
+                word.style.top = `calc(50% + ${top}px)`;
+                word.style.animationDelay = (i * 50) + 'ms';
+                word.style.transform = `rotate(${angle}rad)`;
 
-            heartContainer.appendChild(word);
+                heartContainer.appendChild(word);
+            }
         }
 
-        // Funções dos Botões
+        createHeart();
+
         function sim() {
             alert("Ainda bem que aceitou! Vou te encher de beijos quando te encontrar! :)");
             location.href = "https://music.youtube.com/watch?v=vUI2PT3rKts";
         }
 
         function desvia(btn) {
-            btn.style.position = 'absolute';
-            btn.style.bottom = geraPosicao(10, 90);
-            btn.style.left = geraPosicao(10, 90);
-        }
-
-        function geraPosicao(min, max) {
-            return (Math.random() * (max - min) + min) + "%";
+            // Garante que o botão não fuja para fora da tela
+            const newTop = Math.random() * 80 + 10;
+            const newLeft = Math.random() * 80 + 10;
+            btn.style.position = 'fixed';
+            btn.style.top = newTop + '%';
+            btn.style.left = newLeft + '%';
         }
     </script>
 </body>
