@@ -50,7 +50,7 @@
         .love-word {
             position: absolute;
             color: var(--neon-pink);
-            font-size: 1.1rem;
+            font-size: 1.2rem; /* Fonte maior para o coração gigante */
             text-shadow: 0 0 10px #fff;
             white-space: nowrap;
             font-weight: bold;
@@ -114,23 +114,11 @@
             0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
             100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
         }
-
-        /* Esconder o player de música */
-        #music-player {
-            position: absolute;
-            width: 0;
-            height: 0;
-            border: none;
-            visibility: hidden;
-        }
     </style>
 </head>
-<body>
-
-    <iframe id="music-player" 
-            src="https://www.youtube.com/embed/vUI2PT3rKts?autoplay=1&loop=1&playlist=vUI2PT3rKts" 
-            allow="autoplay">
-    </iframe>
+<body onclick="playMusic()"> <audio id="meuAudio" loop>
+        <source src="musica.mp3" type="audio/mpeg">
+    </audio>
 
     <div class="background-hearts" id="bg-hearts"></div>
     <div class="main-heart-container" id="heart-wrapper"></div>
@@ -150,15 +138,22 @@
 
     <script>
         const CONFIG = {
-            totalHeartWords: 150,
-            redirectUrl: "https://music.youtube.com/watch?v=vUI2PT3rKts",
+            totalHeartWords: 160, 
             heartText: "i like you"
         };
+
+        // Iniciar música na primeira interação
+        function playMusic() {
+            const audio = document.getElementById('meuAudio');
+            audio.play().catch(e => console.log("Aguardando interação..."));
+        }
 
         function renderMainHeart() {
             const wrapper = document.getElementById('heart-wrapper');
             const isMobile = window.innerWidth < 600;
-            const scale = isMobile ? 18 : 28; 
+            
+            // ESCALA GIGANTE
+            const scale = isMobile ? 20 : 35; 
 
             for (let i = 0; i < CONFIG.totalHeartWords; i++) {
                 const angle = (i / CONFIG.totalHeartWords) * Math.PI * 2;
@@ -168,9 +163,11 @@
                 const span = document.createElement('span');
                 span.className = 'love-word';
                 span.innerText = CONFIG.heartText;
+                
                 span.style.left = `calc(50% + ${x * scale}px)`;
                 span.style.top = `calc(50% + ${y * scale}px)`;
                 span.style.transform = `translate(-50%, -50%) rotate(${angle}rad)`;
+                
                 wrapper.appendChild(span);
             }
         }
@@ -191,16 +188,13 @@
 
         function dodgeButton() {
             const btn = document.getElementById('btn-no');
-            const randomX = Math.random() * (window.innerWidth - btn.offsetWidth);
-            const randomY = Math.random() * (window.innerHeight - btn.offsetHeight);
             btn.style.position = 'fixed';
-            btn.style.left = randomX + 'px';
-            btn.style.top = randomY + 'px';
+            btn.style.left = Math.random() * 80 + 10 + '%';
+            btn.style.top = Math.random() * 80 + 10 + '%';
         }
 
         function handleYes() {
             document.getElementById('screen-success').style.display = 'flex';
-            setTimeout(() => { window.location.href = CONFIG.redirectUrl; }, 4000);
         }
 
         window.onload = () => {
