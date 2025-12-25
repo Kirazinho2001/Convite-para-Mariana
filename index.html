@@ -7,6 +7,7 @@
     <style>
         :root {
             --primary-pink: #ff7a7a;
+            --spotify-green: #1DB954;
             --neon-pink: #ea80b0;
             --bg-gradient: radial-gradient(circle, #220a11 0%, #000 100%);
         }
@@ -25,29 +26,47 @@
             color: white;
         }
 
-        /* Botão de Música */
-        #music-control {
+        /* --- Controle de Música Estilo Spotify --- */
+        .music-player-container {
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 1000;
-            background: rgba(255, 122, 122, 0.2);
-            border: 2px solid var(--primary-pink);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #spotify-btn {
+            width: 60px;
+            height: 60px;
+            background: black;
+            border: 2px solid var(--spotify-green);
             border-radius: 50%;
-            width: 55px;
-            height: 55px;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            box-shadow: 0 0 15px var(--primary-pink);
+            box-shadow: 0 0 15px var(--spotify-green);
+            transition: 0.3s;
         }
 
-        .playing { animation: rotate 3s linear infinite; background: rgba(255, 122, 122, 0.5) !important; }
+        #spotify-btn svg { width: 35px; fill: var(--spotify-green); }
 
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .playing { animation: rotate 4s linear infinite; }
 
-        /* Coração Central */
+        /* Barra de Volume */
+        .volume-slider {
+            width: 80px;
+            cursor: pointer;
+            accent-color: var(--spotify-green);
+            opacity: 0.7;
+            transition: 0.3s;
+        }
+        .volume-slider:hover { opacity: 1; }
+
+        /* --- Coração Central --- */
         .main-heart-container {
             position: absolute;
             inset: 0;
@@ -65,7 +84,7 @@
             animation: pulse 3s infinite ease-in-out alternate;
         }
 
-        /* Card do Convite */
+        /* --- Card --- */
         .card {
             position: relative;
             z-index: 10;
@@ -80,8 +99,6 @@
             backdrop-filter: blur(10px);
         }
 
-        h2 { margin-bottom: 2rem; font-size: 1.5rem; text-shadow: 0 0 10px var(--primary-pink); }
-
         .btn {
             background: var(--primary-pink);
             color: white;
@@ -90,6 +107,7 @@
             border-radius: 10px;
             cursor: pointer;
             font-weight: bold;
+            margin-top: 20px;
         }
 
         #screen-success {
@@ -101,18 +119,23 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            text-align: center;
         }
 
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes pulse { from { opacity: 0.5; transform: scale(0.95); } to { opacity: 1; transform: scale(1.05); } }
     </style>
 </head>
 <body>
 
-    <div id="music-control" onclick="toggleMusic()">
-        <span id="music-icon" style="font-size: 28px;">🎵</span>
+    <div class="music-player-container">
+        <div id="spotify-btn" onclick="toggleMusic()">
+            <svg viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.49 17.31c-.22.36-.68.47-1.05.25-2.81-1.73-6.35-2.12-10.51-1.17-.41.1-.82-.16-.92-.57-.1-.41.16-.82.57-.92 4.58-1.04 8.52-.6 11.66 1.33.37.23.49.69.25 1.08zm1.48-3.26c-.28.45-.87.59-1.32.32-3.22-1.98-8.12-2.55-11.93-1.39-.51.15-1.04-.15-1.19-.66-.15-.51.15-1.04.66-1.19 4.35-1.32 9.75-.68 13.46 1.59.45.28.6 0.87.32 1.33zm.12-3.41C15.22 8.35 8.8 8.14 5.08 9.27c-.59.18-1.21-.16-1.39-.75s.16-1.21.75-1.39c4.26-1.29 11.36-1.05 15.82 1.6.53.31.71 1 .39 1.53-.31.53-1 .71-1.53.39z"/></svg>
+        </div>
+        <input type="range" class="volume-slider" min="0" max="1" step="0.1" value="0.8" oninput="changeVolume(this.value)">
     </div>
 
-    <audio id="meuAudio" loop preload="auto">
+    <audio id="meuAudio" loop preload="auto" crossorigin="anonymous">
         <source src="https://raw.githubusercontent.com/Kirazinho2001/Convite-para-Mariana/main/musica.mp3" type="audio/mpeg">
     </audio>
 
@@ -120,7 +143,7 @@
 
     <main class="card">
         <h2>Vamos sair segunda minha morena paçoca?</h2>
-        <div style="display: flex; justify-content: center; gap: 1.5rem; margin-top: 2rem;">
+        <div style="display: flex; justify-content: center; gap: 1.5rem;">
             <button class="btn" onclick="handleYes()">SIM</button>
             <button class="btn" id="btn-no" onmouseover="dodgeButton()" onclick="dodgeButton()">NÃO</button>
         </div>
@@ -128,25 +151,25 @@
 
     <div id="screen-success">
         <h1 style="color: var(--primary-pink); margin-bottom: 20px;">Ainda bem que aceitou! ❤️</h1>
-        <p style="font-size: 1.2rem;">Vou te encher de beijos quando te encontrar! :)</p>
-    </section>
+        <p>Vou te encher de beijos quando te encontrar! :)</p>
+    </div>
 
     <script>
         const audio = document.getElementById('meuAudio');
-        const musicControl = document.getElementById('music-control');
-        const musicIcon = document.getElementById('music-icon');
+        const spotifyBtn = document.getElementById('spotify-btn');
 
         function toggleMusic() {
-            // Tenta tocar imediatamente ao clicar
             if (audio.paused) {
                 audio.play();
-                musicControl.classList.add('playing');
-                musicIcon.innerText = '⏸️';
+                spotifyBtn.classList.add('playing');
             } else {
                 audio.pause();
-                musicControl.classList.remove('playing');
-                musicIcon.innerText = '🎵';
+                spotifyBtn.classList.remove('playing');
             }
+        }
+
+        function changeVolume(val) {
+            audio.volume = val;
         }
 
         function renderMainHeart() {
