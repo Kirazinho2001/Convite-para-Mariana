@@ -5,139 +5,178 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vamos sair segunda?</title>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            margin: 0;
-            padding: 0;
-            background: radial-gradient(circle, #220a11 0%, #000000 100%);
-            overflow: hidden;
-            font-family: 'Arial', sans-serif;
+            background: radial-gradient(circle, #220a11 0%, #000 100%);
             height: 100vh;
             width: 100vw;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-        }
-
-        #conteudo {
-            position: relative;
-            z-index: 100; /* Garante que os botões fiquem na frente */
-            text-align: center;
-            padding: 20px;
             color: white;
         }
 
-        h2 {
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            text-shadow: 0 0 15px #ff7a7a;
-        }
-
-        .btn-container {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            height: 50px;
-        }
-
-        .btn {
-            background: #ff7a7a;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            width: 80px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            box-shadow: 0 0 10px rgba(255, 122, 122, 0.5);
-        }
-
-        /* Estilos do Coração */
+        /* Coração Principal (i like you) */
         .heart-container {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
             width: 100%;
             height: 100%;
-            pointer-events: none; /* Deixa clicar nos botões através das letras */
+            pointer-events: none;
+            z-index: 1;
         }
 
         .love-word {
             position: absolute;
             color: #ea80b0;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             text-shadow: 0 0 8px #fff;
             white-space: nowrap;
-            text-transform: lowercase;
-            opacity: 0.8;
             animation: pulse 3s infinite ease-in-out alternate;
         }
 
         @keyframes pulse {
-            from { opacity: 0.5; transform: scale(0.9); }
+            from { opacity: 0.4; transform: scale(0.9); }
             to { opacity: 1; transform: scale(1.1); }
         }
+
+        /* Corações Flutuantes do Fundo */
+        .floating-heart {
+            position: absolute;
+            color: rgba(255, 122, 122, 0.4);
+            font-size: 20px;
+            user-select: none;
+            pointer-events: none;
+            z-index: 0;
+            animation: float 8s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Caixa de Conteúdo */
+        #conteudo {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 40px;
+            border-radius: 20px;
+            border: 2px solid #ff7a7a;
+            box-shadow: 0 0 30px #ff7a7a;
+            max-width: 90%;
+        }
+
+        h2 { margin-bottom: 30px; font-size: 1.6rem; text-shadow: 0 0 10px #ff7a7a; }
+
+        .btn-container { display: flex; justify-content: center; gap: 20px; min-height: 50px; }
+
+        .btn {
+            background: #ff7a7a;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            box-shadow: 0 0 10px rgba(255, 122, 122, 0.5);
+            transition: 0.3s;
+        }
+
+        .btn:hover { transform: scale(1.1); background: #ff4f4f; }
+
+        /* Overlay de Resposta Final */
+        #resposta {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 100;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #resposta h1 { color: #ff7a7a; text-shadow: 0 0 15px #fff; margin-bottom: 20px; font-size: 2.5rem; }
+        #resposta p { font-size: 1.2rem; }
     </style>
 </head>
 <body>
 
-    <div class="heart-container" id="heart"></div>
+    <div id="background-hearts"></div>
+    <div class="heart-container" id="main-heart"></div>
 
     <div id="conteudo">
-        <h2>Vamos sair segunda?</h2>
+        <h2>Vamos sair segunda minha morena paçoca?</h2>
         <div class="btn-container">
-            <button class="btn" onclick="sim()">SIM</button>
+            <button class="btn" onclick="aceitou()">SIM</button>
             <button id="btnNao" class="btn" onmouseover="desvia(this)" onclick="desvia(this)">NÃO</button>
         </div>
     </div>
 
+    <div id="resposta">
+        <h1>Ainda bem que aceitou! ❤️</h1>
+        <p>Vou te encher de beijos quando te encontrar! :)</p>
+        <br>
+        <p style="font-size: 0.9rem; opacity: 0.7;">Redirecionando para nossa música...</p>
+    </div>
+
     <script>
-        const heartContainer = document.getElementById('heart');
-        const totalWords = 100; // Mais palavras para o coração ficar cheio
-
-        function createHeart() {
-            for (let i = 0; i < totalWords; i++) {
-                const word = document.createElement('div');
-                word.className = 'love-word';
-                word.innerText = 'i like you';
-                
-                // Ângulo para a fórmula do coração
-                const angle = (i / totalWords) * Math.PI * 2;
-                
-                // Fórmula matemática do formato de coração (Parametric Heart)
-                const x = 16 * Math.pow(Math.sin(angle), 3);
-                const y = -(13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle));
-                
-                // Ajuste de escala para mobile e desktop
-                const responsiveScale = window.innerWidth < 600 ? 10 : 18;
-                
-                const left = (x * responsiveScale);
-                const top = (y * responsiveScale);
-
-                // Posiciona a partir do centro
-                word.style.left = `calc(50% + ${left}px)`;
-                word.style.top = `calc(50% + ${top}px)`;
-                word.style.animationDelay = (i * 50) + 'ms';
-                word.style.transform = `rotate(${angle}rad)`;
-
-                heartContainer.appendChild(word);
-            }
+        // 1. Gerar Coração Principal "i like you"
+        const mainHeart = document.getElementById('main-heart');
+        const totalLines = 85;
+        for (let i = 0; i < totalLines; i++) {
+            const word = document.createElement('div');
+            word.className = 'love-word';
+            word.innerText = 'i like you';
+            const angle = (i / totalLines) * Math.PI * 2;
+            const x = 16 * Math.pow(Math.sin(angle), 3);
+            const y = -(13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle));
+            const scale = window.innerWidth < 600 ? 9 : 15;
+            word.style.left = `calc(50% + ${x * scale}px)`;
+            word.style.top = `calc(50% + ${y * scale}px)`;
+            word.style.transform = `rotate(${angle}rad)`;
+            mainHeart.appendChild(word);
         }
 
-        createHeart();
-
-        function sim() {
-            alert("Ainda bem que aceitou! Vou te encher de beijos quando te encontrar! :)");
-            location.href = "https://music.youtube.com/watch?v=vUI2PT3rKts";
+        // 2. Corações flutuantes aleatórios
+        const bgContainer = document.getElementById('background-hearts');
+        function createFloatingHeart() {
+            const h = document.createElement('div');
+            h.className = 'floating-heart';
+            h.innerHTML = '❤️';
+            h.style.left = Math.random() * 100 + 'vw';
+            h.style.fontSize = (Math.random() * 20 + 10) + 'px';
+            h.style.animationDuration = (Math.random() * 4 + 4) + 's';
+            bgContainer.appendChild(h);
+            setTimeout(() => h.remove(), 8000);
         }
+        setInterval(createFloatingHeart, 400);
 
+        // 3. Lógica dos botões
         function desvia(btn) {
-            // Garante que o botão não fuja para fora da tela
-            const newTop = Math.random() * 80 + 10;
-            const newLeft = Math.random() * 80 + 10;
             btn.style.position = 'fixed';
-            btn.style.top = newTop + '%';
-            btn.style.left = newLeft + '%';
+            btn.style.top = Math.random() * 70 + 15 + '%';
+            btn.style.left = Math.random() * 70 + 15 + '%';
+        }
+
+        function aceitou() {
+            document.getElementById('resposta').style.display = 'flex';
+            // Chuva de corações extra no final
+            for(let i=0; i<50; i++) setTimeout(createFloatingHeart, i*50);
+            
+            setTimeout(() => {
+                location.href = "https://music.youtube.com/watch?v=vUI2PT3rKts";
+            }, 5000);
         }
     </script>
 </body>
