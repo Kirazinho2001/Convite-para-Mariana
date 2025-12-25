@@ -25,21 +25,35 @@
             color: white;
         }
 
-        /* --- Fundo com Corações Flutuantes --- */
-        .background-hearts {
-            position: absolute;
-            inset: 0;
-            z-index: 0;
-            pointer-events: none;
+        /* --- Botão de Play no Canto --- */
+        #music-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255, 122, 122, 0.2);
+            border: 2px solid var(--primary-pink);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 0 15px var(--primary-pink);
+            transition: 0.3s;
         }
 
-        .floating-heart {
-            position: absolute;
-            color: rgba(255, 122, 122, 0.4);
-            animation: floatUp linear infinite;
+        #music-control:hover { transform: scale(1.1); background: rgba(255, 122, 122, 0.4); }
+
+        .playing { animation: rotate 3s linear infinite; }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
-        /* --- Coração Central (Tamanho Ajustado) --- */
+        /* --- Coração Central --- */
         .main-heart-container {
             position: absolute;
             inset: 0;
@@ -57,7 +71,7 @@
             animation: pulse 3s infinite ease-in-out alternate;
         }
 
-        /* --- Interface do Convite --- */
+        /* --- Interface --- */
         .card {
             position: relative;
             z-index: 10;
@@ -72,13 +86,7 @@
             backdrop-filter: blur(10px);
         }
 
-        h2 { 
-            margin-bottom: 2rem; 
-            font-size: 1.5rem; 
-            text-shadow: 0 0 10px var(--primary-pink); 
-        }
-
-        .btn-group { display: flex; justify-content: center; gap: 1.5rem; min-height: 50px; }
+        h2 { margin-bottom: 2rem; font-size: 1.5rem; text-shadow: 0 0 10px var(--primary-pink); }
 
         .btn {
             background: var(--primary-pink);
@@ -87,13 +95,9 @@
             padding: 0.8rem 1.8rem;
             border-radius: 10px;
             cursor: pointer;
-            font-weight: 800;
-            transition: all 0.3s ease;
+            font-weight: bold;
         }
 
-        .btn:hover { transform: scale(1.05); background: #ff4f4f; }
-
-        /* --- Tela de Sucesso --- */
         #screen-success {
             display: none;
             position: fixed;
@@ -103,33 +107,29 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            text-align: center;
         }
 
-        /* --- Animações --- */
         @keyframes pulse {
             from { opacity: 0.5; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1.05); }
-        }
-
-        @keyframes floatUp {
-            0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
-            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
         }
     </style>
 </head>
 <body>
 
+    <div id="music-control" onclick="toggleMusic()">
+        <span id="music-icon" style="font-size: 24px;">🎵</span>
+    </div>
+
     <audio id="meuAudio" loop preload="auto">
         <source src="musica.mp3" type="audio/mpeg">
     </audio>
 
-    <div class="background-hearts" id="bg-hearts"></div>
     <div class="main-heart-container" id="heart-wrapper"></div>
 
     <main class="card">
         <h2>Vamos sair segunda minha morena paçoca?</h2>
-        <div class="btn-group">
+        <div style="display: flex; justify-content: center; gap: 1.5rem; margin-top: 2rem;">
             <button class="btn" onclick="handleYes()">SIM</button>
             <button class="btn" id="btn-no" onmouseover="dodgeButton()" onclick="dodgeButton()">NÃO</button>
         </div>
@@ -142,18 +142,24 @@
 
     <script>
         const audio = document.getElementById('meuAudio');
+        const musicControl = document.getElementById('music-control');
+        const musicIcon = document.getElementById('music-icon');
 
-        // 1. Toca a música na primeira interação
-        function tocarMusica() {
-            audio.play().catch(e => console.log("Aguardando clique..."));
+        function toggleMusic() {
+            if (audio.paused) {
+                audio.play();
+                musicControl.classList.add('playing');
+                musicIcon.innerText = '⏸️';
+            } else {
+                audio.pause();
+                musicControl.classList.remove('playing');
+                musicIcon.innerText = '🎵';
+            }
         }
 
-        // 2. Desenha o coração (Tamanho diminuído conforme pedido)
         function renderMainHeart() {
             const wrapper = document.getElementById('heart-wrapper');
             const isMobile = window.innerWidth < 600;
-            
-            // ESCALA REDUZIDA: Voltou para um tamanho médio elegante
             const scale = isMobile ? 12 : 18; 
             const totalWords = 100;
 
@@ -165,49 +171,25 @@
                 const span = document.createElement('span');
                 span.className = 'love-word';
                 span.innerText = "i like you";
-                
                 span.style.left = `calc(50% + ${x * scale}px)`;
                 span.style.top = `calc(50% + ${y * scale}px)`;
                 span.style.transform = `translate(-50%, -50%) rotate(${angle}rad)`;
-                
                 wrapper.appendChild(span);
             }
         }
 
-        // 3. Corações flutuantes no fundo
-        function startFloatingHearts() {
-            const container = document.getElementById('bg-hearts');
-            setInterval(() => {
-                const heart = document.createElement('div');
-                heart.className = 'floating-heart';
-                heart.innerHTML = '❤️';
-                heart.style.left = Math.random() * 100 + 'vw';
-                heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
-                heart.style.animationDuration = (Math.random() * 6 + 4) + 's';
-                container.appendChild(heart);
-                setTimeout(() => heart.remove(), 8000);
-            }, 500);
-        }
-
-        // 4. Botão que foge
         function dodgeButton() {
-            tocarMusica();
             const btn = document.getElementById('btn-no');
             btn.style.position = 'fixed';
             btn.style.left = Math.random() * 80 + 10 + '%';
             btn.style.top = Math.random() * 80 + 10 + '%';
         }
 
-        // 5. Aceitou
         function handleYes() {
-            tocarMusica();
             document.getElementById('screen-success').style.display = 'flex';
         }
 
-        window.onload = () => {
-            renderMainHeart();
-            startFloatingHearts();
-        };
+        window.onload = renderMainHeart;
     </script>
 </body>
 </html>
