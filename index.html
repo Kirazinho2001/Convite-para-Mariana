@@ -26,21 +26,25 @@
             color: white;
         }
 
-        /* --- Controle de Música Estilo Spotify --- */
+        /* --- Player de Música Otimizado --- */
         .music-player-container {
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 1000;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
         }
 
         #spotify-btn {
-            width: 60px;
-            height: 60px;
+            width: 45px;
+            height: 45px;
             background: black;
             border: 2px solid var(--spotify-green);
             border-radius: 50%;
@@ -48,25 +52,47 @@
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            box-shadow: 0 0 15px var(--spotify-green);
+            box-shadow: 0 0 10px var(--spotify-green);
             transition: 0.3s;
         }
 
-        #spotify-btn svg { width: 35px; fill: var(--spotify-green); }
+        #spotify-btn svg { width: 25px; fill: var(--spotify-green); }
 
         .playing { animation: rotate 4s linear infinite; }
 
-        /* Barra de Volume */
+        /* Controle de Volume Escondido */
+        .volume-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            max-width: 0;
+            overflow: hidden;
+            transition: max-width 0.5s ease-in-out, opacity 0.3s;
+            opacity: 0;
+        }
+
+        .volume-group.active {
+            max-width: 150px;
+            opacity: 1;
+        }
+
         .volume-slider {
             width: 80px;
             cursor: pointer;
             accent-color: var(--spotify-green);
-            opacity: 0.7;
-            transition: 0.3s;
         }
-        .volume-slider:hover { opacity: 1; }
 
-        /* --- Coração Central --- */
+        #volume-icon-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        /* --- Coração e Card --- */
         .main-heart-container {
             position: absolute;
             inset: 0;
@@ -84,7 +110,6 @@
             animation: pulse 3s infinite ease-in-out alternate;
         }
 
-        /* --- Card --- */
         .card {
             position: relative;
             z-index: 10;
@@ -95,7 +120,7 @@
             border: 2px solid var(--primary-pink);
             box-shadow: 0 0 30px rgba(255, 122, 122, 0.4);
             max-width: 420px;
-            width: 90%;
+            width: 95%;
             backdrop-filter: blur(10px);
         }
 
@@ -129,10 +154,15 @@
 <body>
 
     <div class="music-player-container">
+        <button id="volume-icon-btn" onclick="toggleVolumeSlider()">🔊</button>
+        
+        <div class="volume-group" id="volume-wrapper">
+            <input type="range" class="volume-slider" min="0" max="1" step="0.1" value="0.8" oninput="changeVolume(this.value)">
+        </div>
+
         <div id="spotify-btn" onclick="toggleMusic()">
             <svg viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.49 17.31c-.22.36-.68.47-1.05.25-2.81-1.73-6.35-2.12-10.51-1.17-.41.1-.82-.16-.92-.57-.1-.41.16-.82.57-.92 4.58-1.04 8.52-.6 11.66 1.33.37.23.49.69.25 1.08zm1.48-3.26c-.28.45-.87.59-1.32.32-3.22-1.98-8.12-2.55-11.93-1.39-.51.15-1.04-.15-1.19-.66-.15-.51.15-1.04.66-1.19 4.35-1.32 9.75-.68 13.46 1.59.45.28.6 0.87.32 1.33zm.12-3.41C15.22 8.35 8.8 8.14 5.08 9.27c-.59.18-1.21-.16-1.39-.75s.16-1.21.75-1.39c4.26-1.29 11.36-1.05 15.82 1.6.53.31.71 1 .39 1.53-.31.53-1 .71-1.53.39z"/></svg>
         </div>
-        <input type="range" class="volume-slider" min="0" max="1" step="0.1" value="0.8" oninput="changeVolume(this.value)">
     </div>
 
     <audio id="meuAudio" loop preload="auto" crossorigin="anonymous">
@@ -157,6 +187,7 @@
     <script>
         const audio = document.getElementById('meuAudio');
         const spotifyBtn = document.getElementById('spotify-btn');
+        const volumeWrapper = document.getElementById('volume-wrapper');
 
         function toggleMusic() {
             if (audio.paused) {
@@ -168,6 +199,10 @@
             }
         }
 
+        function toggleVolumeSlider() {
+            volumeWrapper.classList.toggle('active');
+        }
+
         function changeVolume(val) {
             audio.volume = val;
         }
@@ -175,7 +210,7 @@
         function renderMainHeart() {
             const wrapper = document.getElementById('heart-wrapper');
             const isMobile = window.innerWidth < 600;
-            const scale = isMobile ? 13 : 20; 
+            const scale = isMobile ? 12 : 18; 
 
             for (let i = 0; i < 110; i++) {
                 const angle = (i / 110) * Math.PI * 2;
