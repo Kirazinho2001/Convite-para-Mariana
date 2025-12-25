@@ -26,16 +26,23 @@
             color: white;
         }
 
-        /* --- Player do YouTube (Escondido) --- */
-        #video-container {
+        /* --- Chuva de Corações ao Redor --- */
+        .heart-particle {
             position: absolute;
-            width: 0;
-            height: 0;
+            color: var(--primary-pink);
             pointer-events: none;
-            opacity: 0;
+            z-index: 5;
+            filter: drop-shadow(0 0 5px var(--primary-pink));
+            animation: moveHeart linear forwards;
         }
 
-        /* --- Botão Spotify --- */
+        @keyframes moveHeart {
+            0% { transform: translate(0, 0) scale(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; transform: scale(1); }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0.5) rotate(360deg); opacity: 0; }
+        }
+
+        /* --- Player Spotify --- */
         .music-player-container {
             position: fixed;
             top: 20px;
@@ -75,8 +82,6 @@
             backdrop-filter: blur(10px);
         }
 
-        h2 { margin-bottom: 2rem; font-size: 1.5rem; text-shadow: 0 0 10px var(--primary-pink); }
-
         .btn {
             background: var(--primary-pink);
             color: white;
@@ -109,7 +114,9 @@
 </head>
 <body>
 
-    <div id="video-container"></div>
+    <audio id="meuAudio" loop preload="auto">
+        <source src="musica.mp3" type="audio/mpeg">
+    </audio>
 
     <div class="music-player-container">
         <div id="spotify-btn" onclick="toggleMusic()">
@@ -119,7 +126,7 @@
 
     <div class="main-heart-container" id="heart-wrapper"></div>
 
-    <main class="card" id="card-principal">
+    <main class="card">
         <h2>Vamos sair segunda minha morena paçoca?</h2>
         <div style="display: flex; justify-content: center; gap: 1.5rem;">
             <button class="btn" onclick="handleYes()">SIM</button>
@@ -133,33 +140,45 @@
     </div>
 
     <script>
-        let musicStarted = false;
+        const audio = document.getElementById('meuAudio');
         const spotifyBtn = document.getElementById('spotify-btn');
 
         function toggleMusic() {
-            const container = document.getElementById('video-container');
-            
-            if (!musicStarted) {
-                // Primeira vez: Insere o iframe do YouTube "Foi assim - Sotam"
-                container.innerHTML = `<iframe id="yt-player" width="0" height="0" src="https://www.youtube.com/embed/vUI2PT3rKts?autoplay=1&loop=1&playlist=vUI2PT3rKts" frameborder="0" allow="autoplay"></iframe>`;
+            if (audio.paused) {
+                audio.play();
                 spotifyBtn.classList.add('playing');
-                musicStarted = true;
             } else {
-                // Alternar: O jeito mais simples de pausar/tocar um iframe sem API complexa é removendo/reinserindo ou usando display
-                if (container.style.display === 'none') {
-                    container.style.display = 'block';
-                    spotifyBtn.classList.add('playing');
-                } else {
-                    container.style.display = 'none';
-                    spotifyBtn.classList.remove('playing');
-                }
+                audio.pause();
+                spotifyBtn.classList.remove('playing');
             }
+        }
+
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.innerHTML = '❤️';
+            heart.className = 'heart-particle';
+            
+            // Posição inicial (centro do card)
+            heart.style.left = '50%';
+            heart.style.top = '50%';
+            
+            // Direção aleatória para os corações flutuarem para longe
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 150 + Math.random() * 200;
+            heart.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
+            heart.style.setProperty('--ty', `${Math.sin(angle) * dist}px`);
+            
+            heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+            heart.style.animationDuration = (Math.random() * 2 + 3) + 's';
+            
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 5000);
         }
 
         function renderMainHeart() {
             const wrapper = document.getElementById('heart-wrapper');
             const isMobile = window.innerWidth < 600;
-            const scale = isMobile ? 12 : 18; // Tamanho médio/equilibrado
+            const scale = isMobile ? 12 : 18;
             for (let i = 0; i < 110; i++) {
                 const angle = (i / 110) * Math.PI * 2;
                 const x = 16 * Math.pow(Math.sin(angle), 3);
@@ -183,8 +202,12 @@
 
         function handleYes() { 
             document.getElementById('screen-success').style.display = 'flex'; 
+            // Chuva intensa de corações ao aceitar
+            setInterval(createHeart, 100);
         }
         
+        // Inicia os corações flutuantes e o desenho central
+        setInterval(createHeart, 500);
         window.onload = renderMainHeart;
     </script>
 </body>
