@@ -48,7 +48,7 @@
 
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* Coração Central */
+        /* Coração Central de Frases */
         .main-heart-container {
             position: absolute;
             inset: 0;
@@ -66,16 +66,16 @@
             animation: pulse 3s infinite ease-in-out alternate;
         }
 
-        /* Interface do Convite */
+        /* Card do Convite */
         .card {
             position: relative;
             z-index: 10;
             text-align: center;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             padding: 2.5rem;
             border-radius: 20px;
             border: 2px solid var(--primary-pink);
-            box-shadow: 0 0 30px rgba(255, 122, 122, 0.3);
+            box-shadow: 0 0 30px rgba(255, 122, 122, 0.4);
             max-width: 420px;
             width: 90%;
             backdrop-filter: blur(10px);
@@ -92,8 +92,12 @@
             cursor: pointer;
             font-weight: bold;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: 0.2s;
         }
 
+        .btn:hover { transform: scale(1.05); }
+
+        /* Mensagem de Sucesso */
         #screen-success {
             display: none;
             position: fixed;
@@ -103,6 +107,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            text-align: center;
         }
 
         @keyframes pulse { from { opacity: 0.5; transform: scale(0.95); } to { opacity: 1; transform: scale(1.05); } }
@@ -115,12 +120,12 @@
     </div>
 
     <audio id="meuAudio" loop preload="auto">
-        <source src="./musica.mp3" type="audio/mpeg">
+        <source src="musica.mp3" type="audio/mpeg">
     </audio>
 
     <div class="main-heart-container" id="heart-wrapper"></div>
 
-    <main class="card" id="main-card">
+    <main class="card">
         <h2>Vamos sair segunda minha morena paçoca?</h2>
         <div style="display: flex; justify-content: center; gap: 1.5rem; margin-top: 2rem;">
             <button class="btn" onclick="handleYes()">SIM</button>
@@ -129,8 +134,8 @@
     </main>
 
     <section id="screen-success">
-        <h1>Ainda bem que aceitou! ❤️</h1>
-        <p>Vou te encher de beijos quando te encontrar! :)</p>
+        <h1 style="color: var(--primary-pink); margin-bottom: 20px;">Ainda bem que aceitou! ❤️</h1>
+        <p style="font-size: 1.2rem;">Vou te encher de beijos quando te encontrar! :)</p>
     </section>
 
     <script>
@@ -138,15 +143,13 @@
         const musicControl = document.getElementById('music-control');
         const musicIcon = document.getElementById('music-icon');
 
-        // Função de tocar/pausar com diagnóstico
         function toggleMusic() {
             if (audio.paused) {
                 audio.play().then(() => {
                     musicControl.classList.add('playing');
                     musicIcon.innerText = '⏸️';
-                }).catch(error => {
-                    alert("Erro ao tocar: Verifique se o arquivo se chama musica.mp3 e está no GitHub.");
-                    console.error("Erro de áudio:", error);
+                }).catch(() => {
+                    alert("Aguardando carregamento da música. Tente novamente em instantes.");
                 });
             } else {
                 audio.pause();
@@ -158,11 +161,11 @@
         function renderMainHeart() {
             const wrapper = document.getElementById('heart-wrapper');
             const isMobile = window.innerWidth < 600;
-            const scale = isMobile ? 12 : 18; 
-            const totalWords = 100;
+            // Escala equilibrada para não ficar grande demais
+            const scale = isMobile ? 13 : 20; 
 
-            for (let i = 0; i < totalWords; i++) {
-                const angle = (i / totalWords) * Math.PI * 2;
+            for (let i = 0; i < 110; i++) {
+                const angle = (i / 110) * Math.PI * 2;
                 const x = 16 * Math.pow(Math.sin(angle), 3);
                 const y = -(13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle));
                 const span = document.createElement('span');
