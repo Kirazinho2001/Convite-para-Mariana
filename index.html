@@ -27,12 +27,12 @@
         }
 
         /* --- Player do YouTube (Escondido) --- */
-        #youtube-player-container {
+        #video-container {
             position: absolute;
             width: 0;
             height: 0;
-            overflow: hidden;
             pointer-events: none;
+            opacity: 0;
         }
 
         /* --- Botão Spotify --- */
@@ -75,6 +75,8 @@
             backdrop-filter: blur(10px);
         }
 
+        h2 { margin-bottom: 2rem; font-size: 1.5rem; text-shadow: 0 0 10px var(--primary-pink); }
+
         .btn {
             background: var(--primary-pink);
             color: white;
@@ -99,7 +101,7 @@
         }
 
         .main-heart-container { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
-        .love-word { position: absolute; color: var(--neon-pink); font-size: 0.9rem; text-shadow: 0 0 8px #fff; white-space: nowrap; font-weight: bold; animation: pulse 3s infinite ease-in-out alternate; }
+        .love-word { position: absolute; color: var(--neon-pink); font-size: 0.8rem; text-shadow: 0 0 8px #fff; white-space: nowrap; font-weight: bold; animation: pulse 3s infinite ease-in-out alternate; }
 
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes pulse { from { opacity: 0.5; transform: scale(0.95); } to { opacity: 1; transform: scale(1.05); } }
@@ -107,19 +109,17 @@
 </head>
 <body>
 
-    <div id="youtube-player-container">
-        <div id="player"></div>
-    </div>
+    <div id="video-container"></div>
 
     <div class="music-player-container">
-        <div id="spotify-btn" onclick="toggleYouTubeMusic()">
+        <div id="spotify-btn" onclick="toggleMusic()">
             <svg viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.49 17.31c-.22.36-.68.47-1.05.25-2.81-1.73-6.35-2.12-10.51-1.17-.41.1-.82-.16-.92-.57-.1-.41.16-.82.57-.92 4.58-1.04 8.52-.6 11.66 1.33.37.23.49.69.25 1.08zm1.48-3.26c-.28.45-.87.59-1.32.32-3.22-1.98-8.12-2.55-11.93-1.39-.51.15-1.04-.15-1.19-.66-.15-.51.15-1.04.66-1.19 4.35-1.32 9.75-.68 13.46 1.59.45.28.6 0.87.32 1.33zm.12-3.41C15.22 8.35 8.8 8.14 5.08 9.27c-.59.18-1.21-.16-1.39-.75s.16-1.21.75-1.39c4.26-1.29 11.36-1.05 15.82 1.6.53.31.71 1 .39 1.53-.31.53-1 .71-1.53.39z"/></svg>
         </div>
     </div>
 
     <div class="main-heart-container" id="heart-wrapper"></div>
 
-    <main class="card">
+    <main class="card" id="card-principal">
         <h2>Vamos sair segunda minha morena paçoca?</h2>
         <div style="display: flex; justify-content: center; gap: 1.5rem;">
             <button class="btn" onclick="handleYes()">SIM</button>
@@ -132,42 +132,26 @@
         <p>Vou te encher de beijos quando te encontrar! :)</p>
     </div>
 
-    <script src="https://www.youtube.com/iframe_api"></script>
-
     <script>
-        let player;
+        let musicStarted = false;
         const spotifyBtn = document.getElementById('spotify-btn');
 
-        // Inicializa o player do YouTube
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-                height: '0',
-                width: '0',
-                videoId: 'vUI2PT3rKts', // ID da música "Foi assim"
-                playerVars: {
-                    'autoplay': 0,
-                    'loop': 1,
-                    'playlist': 'vUI2PT3rKts'
-                },
-                events: {
-                    'onReady': onPlayerReady
-                }
-            });
-        }
-
-        function onPlayerReady(event) {
-            console.log("YouTube Player pronto.");
-        }
-
-        function toggleYouTubeMusic() {
-            if (player && player.getPlayerState) {
-                const state = player.getPlayerState();
-                if (state === YT.PlayerState.PLAYING) {
-                    player.pauseVideo();
-                    spotifyBtn.classList.remove('playing');
-                } else {
-                    player.playVideo();
+        function toggleMusic() {
+            const container = document.getElementById('video-container');
+            
+            if (!musicStarted) {
+                // Primeira vez: Insere o iframe do YouTube "Foi assim - Sotam"
+                container.innerHTML = `<iframe id="yt-player" width="0" height="0" src="https://www.youtube.com/embed/vUI2PT3rKts?autoplay=1&loop=1&playlist=vUI2PT3rKts" frameborder="0" allow="autoplay"></iframe>`;
+                spotifyBtn.classList.add('playing');
+                musicStarted = true;
+            } else {
+                // Alternar: O jeito mais simples de pausar/tocar um iframe sem API complexa é removendo/reinserindo ou usando display
+                if (container.style.display === 'none') {
+                    container.style.display = 'block';
                     spotifyBtn.classList.add('playing');
+                } else {
+                    container.style.display = 'none';
+                    spotifyBtn.classList.remove('playing');
                 }
             }
         }
@@ -175,7 +159,7 @@
         function renderMainHeart() {
             const wrapper = document.getElementById('heart-wrapper');
             const isMobile = window.innerWidth < 600;
-            const scale = isMobile ? 12 : 18; 
+            const scale = isMobile ? 12 : 18; // Tamanho médio/equilibrado
             for (let i = 0; i < 110; i++) {
                 const angle = (i / 110) * Math.PI * 2;
                 const x = 16 * Math.pow(Math.sin(angle), 3);
@@ -197,7 +181,10 @@
             btn.style.top = Math.random() * 80 + 10 + '%';
         }
 
-        function handleYes() { document.getElementById('screen-success').style.display = 'flex'; }
+        function handleYes() { 
+            document.getElementById('screen-success').style.display = 'flex'; 
+        }
+        
         window.onload = renderMainHeart;
     </script>
 </body>
