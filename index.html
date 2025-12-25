@@ -25,7 +25,7 @@
             color: white;
         }
 
-        /* --- Botão de Play no Canto --- */
+        /* Botão de Música no Canto */
         #music-control {
             position: fixed;
             top: 20px;
@@ -34,8 +34,8 @@
             background: rgba(255, 122, 122, 0.2);
             border: 2px solid var(--primary-pink);
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 55px;
+            height: 55px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -44,16 +44,11 @@
             transition: 0.3s;
         }
 
-        #music-control:hover { transform: scale(1.1); background: rgba(255, 122, 122, 0.4); }
+        .playing { animation: rotate 3s linear infinite; background: rgba(255, 122, 122, 0.5) !important; }
 
-        .playing { animation: rotate 3s linear infinite; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        /* --- Coração Central --- */
+        /* Coração Central */
         .main-heart-container {
             position: absolute;
             inset: 0;
@@ -71,12 +66,12 @@
             animation: pulse 3s infinite ease-in-out alternate;
         }
 
-        /* --- Interface --- */
+        /* Interface do Convite */
         .card {
             position: relative;
             z-index: 10;
             text-align: center;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.8);
             padding: 2.5rem;
             border-radius: 20px;
             border: 2px solid var(--primary-pink);
@@ -96,6 +91,7 @@
             border-radius: 10px;
             cursor: pointer;
             font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
         #screen-success {
@@ -109,25 +105,22 @@
             align-items: center;
         }
 
-        @keyframes pulse {
-            from { opacity: 0.5; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1.05); }
-        }
+        @keyframes pulse { from { opacity: 0.5; transform: scale(0.95); } to { opacity: 1; transform: scale(1.05); } }
     </style>
 </head>
 <body>
 
     <div id="music-control" onclick="toggleMusic()">
-        <span id="music-icon" style="font-size: 24px;">🎵</span>
+        <span id="music-icon" style="font-size: 28px;">🎵</span>
     </div>
 
     <audio id="meuAudio" loop preload="auto">
-        <source src="musica.mp3" type="audio/mpeg">
+        <source src="./musica.mp3" type="audio/mpeg">
     </audio>
 
     <div class="main-heart-container" id="heart-wrapper"></div>
 
-    <main class="card">
+    <main class="card" id="main-card">
         <h2>Vamos sair segunda minha morena paçoca?</h2>
         <div style="display: flex; justify-content: center; gap: 1.5rem; margin-top: 2rem;">
             <button class="btn" onclick="handleYes()">SIM</button>
@@ -145,11 +138,16 @@
         const musicControl = document.getElementById('music-control');
         const musicIcon = document.getElementById('music-icon');
 
+        // Função de tocar/pausar com diagnóstico
         function toggleMusic() {
             if (audio.paused) {
-                audio.play();
-                musicControl.classList.add('playing');
-                musicIcon.innerText = '⏸️';
+                audio.play().then(() => {
+                    musicControl.classList.add('playing');
+                    musicIcon.innerText = '⏸️';
+                }).catch(error => {
+                    alert("Erro ao tocar: Verifique se o arquivo se chama musica.mp3 e está no GitHub.");
+                    console.error("Erro de áudio:", error);
+                });
             } else {
                 audio.pause();
                 musicControl.classList.remove('playing');
@@ -167,7 +165,6 @@
                 const angle = (i / totalWords) * Math.PI * 2;
                 const x = 16 * Math.pow(Math.sin(angle), 3);
                 const y = -(13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle));
-
                 const span = document.createElement('span');
                 span.className = 'love-word';
                 span.innerText = "i like you";
